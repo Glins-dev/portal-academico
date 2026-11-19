@@ -37,7 +37,9 @@ portal-academico/
 │   ├── 03-fluxo-navegacao.md
 │   ├── 04-modulo-atividades.md
 │   ├── 05-regras-notas-frequencia.md
-│   └── 06-guia-testes-entrega.md
+│   ├── 06-guia-testes-entrega.md
+│   ├── 07-guia-atividade-2-manuscrita.md
+│   └── relatorio-erro-portabilidade.md
 ├── src/
 │   ├── components/                  # Diretório reservado para componentes reutilizáveis
 │   ├── data/
@@ -64,8 +66,10 @@ portal-academico/
 │       └── navigation.ts            # Re-exportação de tipos de rotas
 ├── App.tsx                          # Componente raiz (GestureHandlerRootView + SafeAreaProvider)
 ├── index.ts                         # Ponto de entrada com import prioritário do Gesture Handler
-├── babel.config.js                  # Preset Expo + plugin do Reanimated no final
-├── package.json                     # Dependências e scripts
+├── babel.config.js                  # Preset Expo (o plugin do Reanimated/Worklets é automático)
+├── .nvmrc / .npmrc                  # Versão do Node e validação estrita de engines
+├── .env.example                     # Documenta que nenhuma variável de ambiente é necessária
+├── package.json                     # Dependências, scripts e engines (Node)
 └── tsconfig.json                    # Configuração do TypeScript
 ```
 
@@ -90,34 +94,84 @@ portal-academico/
 
 ---
 
-## 🛠️ Como Instalar e Executar no Expo Go
+## 🛠️ Como Instalar e Executar (do zero, em máquina limpa)
 
 ### Pré-requisitos
-- **Node.js** (v20+ ou v22/v24 LTS)
-- Aplicativo **Expo Go** instalado no dispositivo Android ou iOS
 
-### Passo a Passo
+| Item | Versão exigida | Observação |
+| :--- | :--- | :--- |
+| **Node.js** | `^22.13.0`, `^24.3.0` ou `>=26` (recomendado: **24 LTS**) | Exigência do Expo SDK 58, React Native 0.88 e Metro. **Node 18/20 não funcionam.** |
+| **npm** | 10 ou superior (vem com o Node) | Use **somente npm** (o projeto tem `package-lock.json`). |
+| **Git** | Qualquer versão recente | Para clonar o repositório. |
+| **Expo Go** | Versão que suporte o **SDK 58** | Instale/atualize pela Play Store ou App Store. |
 
-1. **Acesse a pasta do projeto**:
+Verifique suas versões:
+
+```bash
+node -v   # deve ser v22.13+ / v24.3+ / v26+
+npm -v
+```
+
+Se usa `nvm` (Linux/macOS) ou `nvm-windows`, o arquivo `.nvmrc` já indica a versão:
+
+```bash
+nvm install 24
+nvm use 24
+```
+
+> O `.npmrc` ativa `engine-strict=true`: com Node incompatível o `npm install` falha logo, com mensagem clara, em vez de quebrar depois no Metro.
+
+### Variáveis de ambiente
+
+**Nenhuma é necessária.** O app usa apenas dados mock (`src/data/`), sem backend, API ou banco de dados. O arquivo [`.env.example`](.env.example) apenas documenta isso; não é preciso criar `.env`.
+
+### Passo a passo
+
+1. **Clone o repositório e entre na pasta**:
    ```bash
+   git clone <URL-DO-REPOSITORIO> portal-academico
    cd portal-academico
    ```
 
-2. **Instale as dependências**:
+2. **Instale as dependências** (usa o `package-lock.json`, garantindo versões idênticas):
    ```bash
-   npm install
+   npm ci
    ```
+   > Use `npm install` apenas se estiver adicionando pacotes. Para novos pacotes use `npx expo install <pacote>`.
 
 3. **(Opcional) Verifique a tipagem TypeScript**:
    ```bash
-   npx tsc --noEmit
+   npm run typecheck
    ```
 
 4. **Inicie o servidor de desenvolvimento do Expo (limpando o cache)**:
    ```bash
-   npx expo start -c
+   npm run start:clear
    ```
 
 5. **Abra no celular**:
-   - No **Android**: Abra o aplicativo **Expo Go** e escaneie o QR Code exibido no terminal.
-   - No **iOS**: Abra a câmera nativa do iPhone e escaneie o QR Code para abrir no **Expo Go**.
+   - **Android**: abra o **Expo Go** e escaneie o QR Code exibido no terminal.
+   - **iOS**: abra a câmera nativa do iPhone e escaneie o QR Code para abrir no **Expo Go**.
+   - **Web (opcional)**: `npm run web`.
+
+### Scripts disponíveis
+
+| Comando | Descrição |
+| :--- | :--- |
+| `npm start` | Inicia o Expo (modo padrão, rede local/LAN) |
+| `npm run start:clear` | Inicia limpando o cache do Metro |
+| `npm run start:lan` | Força o modo LAN (celular e PC na mesma rede Wi-Fi) |
+| `npm run start:tunnel` | Usa túnel (funciona em redes diferentes ou com firewall) |
+| `npm run android` / `ios` / `web` | Inicia e abre na plataforma indicada |
+| `npm run typecheck` | Verifica a tipagem (`tsc --noEmit`) |
+| `npm run doctor` | Diagnostica dependências e configuração (`expo-doctor`) |
+
+### 🩺 Solução de Problemas
+
+| Sintoma | Causa provável | Solução |
+| :--- | :--- | :--- |
+| `npm ERR! code EBADENGINE` / erro do Metro ao iniciar | Node.js desatualizado | Instale Node 24 LTS (ver `.nvmrc`) e rode `npm ci` novamente |
+| O QR Code abre, mas o celular fica em "carregando" ou dá timeout | Celular e PC em redes diferentes, Wi-Fi com isolamento de clientes (comum em faculdades) ou firewall | Use `npm run start:tunnel`. No Windows, libere o Node.js no firewall em redes privadas |
+| "Project is incompatible with this version of Expo Go" | Expo Go desatualizado (não suporta SDK 58) | Atualize o Expo Go na loja de aplicativos |
+| Tela vermelha com módulo não encontrado após atualizar/trocar de branch | Cache do Metro ou `node_modules` desatualizado | `npm ci` e depois `npm run start:clear` |
+| Erros de dependência após adicionar pacotes manualmente | Versão incompatível com o SDK | `npx expo install --fix` e `npm run doctor` |

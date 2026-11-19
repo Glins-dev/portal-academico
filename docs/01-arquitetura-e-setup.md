@@ -22,7 +22,7 @@ portal-academico/
 │   ├── screens/             # Telas de negócio da aplicação (Login, Home, Disciplinas, Detalhes, Atividades, Perfil, etc.)
 │   └── types/               # Interfaces de domínio e tipagem estrita de rotas (index.ts, academic.ts, navigation.ts)
 ├── App.tsx                  # Componente raiz da aplicação
-├── babel.config.js          # Configuração do Babel com preset Expo e plugin do Reanimated
+├── babel.config.js          # Configuração do Babel com preset Expo
 ├── index.ts                 # Ponto de entrada (entry point) com import prioritário do Gesture Handler
 ├── package.json             # Manifesto de dependências e scripts
 └── tsconfig.json            # Configuração estrita do TypeScript (strict: true)
@@ -51,16 +51,13 @@ portal-academico/
 ## 3. Configuração do Reanimated e Gesture Handler
 
 ### 3.1. `babel.config.js`
-O plugin `'react-native-reanimated/plugin'` está configurado obrigatoriamente como o **último item** do array `plugins`:
+Com **Expo SDK 58 + Reanimated 4**, o `babel-preset-expo` configura automaticamente o plugin do Worklets/Reanimated. **Não** declare `react-native-reanimated/plugin` manualmente (alias legado que pode duplicar o plugin):
 
 ```javascript
 module.exports = function (api) {
   api.cache(true);
   return {
     presets: ['babel-preset-expo'],
-    plugins: [
-      'react-native-reanimated/plugin',
-    ],
   };
 };
 ```
